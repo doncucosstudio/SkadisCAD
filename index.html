@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SkadisCAD — IKEA Skadis Pegboard Designer</title>
+<meta name="description" content="Free online designer for IKEA Skadis pegboards. Generate exact 5×15mm pill-shaped hole patterns for laser cutting, CNC routing, and 3D printing. Export to SVG, DXF, G-Code, and PDF.">
+<meta name="keywords" content="IKEA Skadis, pegboard designer, laser cutting, CNC, SVG, DXF, hole pattern, workshop, maker">
+<meta name="author" content="SkadisCAD">
+<meta name="theme-color" content="#0f1117">
+<!-- Open Graph -->
+<meta property="og:title" content="SkadisCAD — IKEA Skadis Pegboard Designer">
+<meta property="og:description" content="Design custom Skadis-compatible pegboard cutouts. Export to SVG, DXF, G-Code, and PDF for laser or CNC.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://skadiscad.app/preview.png">
+<!-- PWA manifest inline -->
+<link rel="manifest" href="data:application/json,{%22name%22:%22SkadisCAD%22,%22short_name%22:%22SkadisCAD%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f1117%22,%22theme_color%22:%22%234f8ef7%22}">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230f1117'/><rect x='6' y='6' width='20' height='20' rx='3' fill='none' stroke='%234f8ef7' stroke-width='2'/><rect x='12' y='10' width='4' height='12' rx='2' fill='%234f8ef7'/><rect x='19' y='10' width='4' height='12' rx='2' fill='%234f8ef7'/></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--panel:#161b22;--border:#21262d;--border2:#30363d;--accent:#4f8ef7;--accent2:#3a7be0;--adim:rgba(79,142,247,0.12);--text:#e6edf3;--text2:#8b949e;--text3:#484f58;--ok:#3fb950;--warn:#d29922;--danger:#f85149;--font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'SF Mono','Fira Code','Cascadia Code',monospace;--r:6px;--r2:12px;--shadow:0 8px 24px rgba(1,4,9,.6)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
+#app{display:grid;grid-template-columns:252px 1fr 232px;grid-template-rows:48px 1fr 36px;height:100vh}
+
+#topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;overflow:hidden}
+.logo{font-weight:700;font-size:15px;letter-spacing:-.3px;flex-shrink:0}.logo span{color:var(--accent)}
+.dv{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.tg{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.tg label{color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap}
+select,input[type=number]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:var(--r);font-size:12px;font-family:var(--font);outline:none}
+select:focus,input:focus{border-color:var(--accent)}input[type=number]{width:60px}
+.spacer{flex:1}
+.badge{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--text3);white-space:nowrap}
+.bdot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.expw{position:relative}
+.expbtn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--r);padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:.2px;box-shadow:0 2px 8px rgba(79,142,247,.35)}
+.expbtn:hover{background:linear-gradient(135deg,var(--accent2),#2d6acc);transform:translateY(-1px);box-shadow:0 4px 12px rgba(79,142,247,.4)}
+.helpbtn{background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:var(--r);padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:var(--font)}
+.helpbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.expmenu{display:none;position:fixed;top:0;right:0;background:var(--panel);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;z-index:999;min-width:200px;box-shadow:var(--shadow);backdrop-filter:blur(8px)}
+.expmenu.open{display:block}
+.expi{display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.expi:last-child{border-bottom:none}.expi:hover{background:var(--adim)}
+.expic{font-size:15px;width:18px;text-align:center}
+.expii strong{display:block;font-size:11px;font-weight:600;color:var(--text)}
+.expii span{font-size:10px;color:var(--text2)}
+
+#lp,#rp{background:var(--panel);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+#lp{border-right:1px solid var(--border)}#rp{border-left:1px solid var(--border)}
+.ps{border-bottom:1px solid var(--border);padding:11px}
+.pt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:9px}
+
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 5px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .1s;font-size:10px;text-align:center}
+.tb:hover{border-color:var(--accent);color:var(--text);background:var(--adim)}.tb.active{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.ti{font-size:17px;line-height:1}
+
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.pb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;font-size:9px;text-align:center;user-select:none}
+.pb:hover{border-color:var(--accent);color:var(--text);background:var(--adim)}
+
+.fr{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.fr label{font-size:11px;color:var(--text2);min-width:56px}
+.fr input{flex:1;padding:4px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px}
+.fr input:focus{border-color:var(--accent);outline:none}
+.ab{width:100%;padding:7px;border-radius:var(--r);background:var(--accent);border:none;color:#fff;font-weight:600;font-size:12px;cursor:pointer;transition:background .15s;margin-bottom:4px}
+.ab:hover{background:var(--accent2)}
+.ab.sec{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.ab.sec:hover{background:var(--adim);color:var(--text);border-color:var(--accent)}
+
+/* Import zone */
+
+#canvas-area{overflow:auto;position:relative;background:
+  radial-gradient(ellipse at 15% 15%,rgba(79,142,247,.06) 0%,transparent 40%),
+  radial-gradient(ellipse at 85% 85%,rgba(63,185,80,.04) 0%,transparent 40%),
+  var(--bg)}
+#cwrap{position:relative;display:inline-block;margin:24px;box-shadow:0 0 0 1px var(--border2),0 0 0 4px rgba(15,17,23,.8),0 20px 60px rgba(1,4,9,.8);border-radius:3px}
+#bc{display:block}#oc{position:absolute;top:0;left:0;pointer-events:none}
+
+.oi{display:flex;align-items:center;gap:7px;padding:7px 11px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.oi:hover{background:var(--adim)}.oi.sel{background:var(--adim);border-left:2px solid var(--accent)}
+.oc2{width:9px;height:9px;border-radius:2px;flex-shrink:0}.on{flex:1;font-size:11px;color:var(--text)}
+.od{color:var(--text3);cursor:pointer;font-size:13px;padding:1px 4px;border-radius:3px}
+.od:hover{color:var(--danger);background:rgba(224,82,82,.15)}
+.ok2{font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:10px}
+.oi.imgshp .on::before{content:'🖼 ';font-size:10px}
+
+.pr{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.pr label{font-size:11px;color:var(--text2);min-width:54px}
+.pr input{flex:1;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px}
+.pr input:focus{border-color:var(--accent);outline:none}
+.tag{display:inline-flex;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--text2)}
+
+/* Hole controls */
+.cbtn{width:100%;padding:7px;border-radius:var(--r);background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.35);color:var(--ok);font-weight:600;font-size:11px;cursor:pointer;transition:all .15s;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:6px}
+.cbtn:hover{background:rgba(62,207,142,.2);border-color:var(--ok)}
+.hovr{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.hovr label{font-size:11px;color:var(--text2);min-width:78px}
+.hovr input[type=number]{width:54px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px}
+.hovr input:focus{border-color:var(--accent);outline:none}
+.rbtn{padding:2px 7px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text3);font-size:10px;cursor:pointer}
+.hcbtn{padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .1s;min-width:70px}
+.hcbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.rbtn:hover{border-color:var(--accent);color:var(--accent)}
+.nudgeg{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px}
+.nbtn{display:flex;align-items:center;justify-content:center;padding:5px 4px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:10px;transition:all .1s}
+.nbtn:hover{border-color:var(--warn);color:var(--warn);background:rgba(240,169,64,.1)}
+
+.tr{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.tr label{font-size:11px;color:var(--text2)}
+.tgl{position:relative;width:30px;height:16px}.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tgls{position:absolute;inset:0;background:var(--border2);border-radius:8px;cursor:pointer;transition:background .2s}
+.tgls:after{content:'';position:absolute;width:10px;height:10px;top:3px;left:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s}
+.tgl input:checked+.tgls{background:var(--accent)}.tgl input:checked+.tgls:after{transform:translateX(14px);background:#fff}
+
+#sb{grid-column:1/-1;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 14px;font-size:11px;color:var(--text3);font-family:var(--mono)}
+#sb span{color:var(--text2)}
+
+/* Modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(1,4,9,.8);z-index:500;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+.mbg.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;min-width:320px;max-width:480px;width:90%;box-shadow:var(--shadow);animation:slideUp .2s ease}
+.modal.wide{max-width:680px}
+.htabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px}
+.htab{padding:5px 12px;border-radius:var(--r);border:1px solid transparent;background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .1s}
+.htab:hover{color:var(--text);background:var(--bg3)}
+.htab.active{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.hpane{display:none}.hpane.active{display:block}
+.hrow{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.hrow:last-child{border-bottom:none}
+.hico{font-size:20px;width:28px;text-align:center;flex-shrink:0;margin-top:1px}
+.htitle{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.hdesc{font-size:11px;color:var(--text2);line-height:1.6}
+.hkbd{display:inline-block;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:1px 6px;font-size:10px;font-family:var(--mono);color:var(--text2);margin:1px 2px}
+.htip{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.7;margin-top:12px}
+.htip strong{color:var(--ok)}
+.modal h3{font-size:14px;font-weight:600;margin-bottom:14px}
+.mbtns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.mbtn{padding:7px 16px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;border:none}
+.mbtn.prim{background:var(--accent);color:#fff}.mbtn.prim:hover{background:var(--accent2)}
+.mbtn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}.mbtn.ghost:hover{background:var(--bg3)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;transition:background .2s}::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer;border:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.hint{font-size:10px;color:var(--text3);line-height:1.6;padding:3px 0}
+.kbd{display:inline-block;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:9px;font-family:var(--mono);color:var(--text2)}
+.sep{height:1px;background:var(--border);margin:7px 0}
+.sempty{padding:20px 11px;text-align:center;color:var(--text3);font-size:11px;line-height:1.7}
+.cg{display:flex;flex-wrap:wrap;gap:4px}
+.cs{width:19px;height:19px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:border-color .1s}
+.cs:hover,.cs.active{border-color:var(--text)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="topbar">
+  <div class="logo"><span style="color:var(--accent)">Skadis</span><span style="color:var(--text);opacity:.9">CAD</span><span style="font-size:9px;font-weight:400;color:var(--text3);margin-left:5px;letter-spacing:.3px;vertical-align:middle">IKEA Skadis Designer</span></div>
+  <div class="dv"></div>
+  <div class="tg"><label>Board</label>
+    <select id="board-preset" onchange="applyBoardPreset(this.value)">
+      <option value="36x56">36×56 cm</option><option value="56x56" selected>56×56 cm</option>
+      <option value="76x56">76×56 cm</option><option value="56x111">56×111 cm</option>
+      <option value="custom">Custom…</option>
+    </select>
+  </div>
+  <div class="tg" id="csg" style="display:none">
+    <label>W</label><input type="number" id="cw2" value="560" min="100" max="2000" onchange="applyCustomSize()">
+    <label>H</label><input type="number" id="ch2" value="560" min="100" max="2000" onchange="applyCustomSize()">
+  </div>
+  <div class="dv"></div>
+  <div class="tg"><label>Scale</label>
+    <select id="zsel" onchange="setZoom(+this.value)">
+      <option value="0.5">50%</option><option value="0.75" selected>75%</option>
+      <option value="1">100%</option><option value="1.5">150%</option><option value="2">200%</option>
+    </select>
+  </div>
+  <div class="dv"></div>
+  <div class="tg"><label>Snap</label>
+    <select id="snapsel" onchange="snapMode=this.value">
+      <option value="hole">Hole grid</option><option value="half">½ grid</option><option value="free">Free</option>
+    </select>
+  </div>
+  <div class="spacer"></div>
+  <div class="badge"><div class="bdot"></div>IKEA Skadis 5×15mm holes · 40mm grid</div>
+  <div class="dv"></div>
+  <button class="helpbtn" onclick="openHelp()">? How to use</button>
+  <div class="expw">
+    <button class="expbtn" onclick="toggleEM()">⬇ Export As ▾</button>
+    <div class="expmenu" id="emenu">
+      <div class="expi" onclick="doExport('svg')"><div class="expic">📐</div><div class="expii"><strong>SVG</strong><span>Laser / Cricut / Lightburn</span></div></div>
+      <div class="expi" onclick="doExport('dxf')"><div class="expic">📏</div><div class="expii"><strong>DXF</strong><span>AutoCAD / Fusion 360</span></div></div>
+      <div class="expi" onclick="doExport('gcode')"><div class="expic">⚙</div><div class="expii"><strong>G-Code (.nc)</strong><span>CNC router / mill</span></div></div>
+      <div class="expi" onclick="doExport('step')"><div class="expic">🧊</div><div class="expii"><strong>STEP profile (DXF)</strong><span>2D profile for 3D CAD</span></div></div>
+      <div class="expi" onclick="doExport('pdf')"><div class="expic">🖨</div><div class="expii"><strong>PDF Template</strong><span>Print 1:1 scale</span></div></div>
+      <div class="expi" onclick="doExport('png')"><div class="expic">🖼</div><div class="expii"><strong>PNG Preview</strong><span>High-res raster</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEFT PANEL -->
+<div id="lp">
+  <div class="ps">
+    <div class="pt">Drawing Tools</div>
+    <div class="tgrid">
+      <div class="tb active" id="tool-select" onclick="setTool('select')"><div class="ti">↖</div><div>Select</div></div>
+      <div class="tb" id="tool-rect" onclick="setTool('rect')"><div class="ti">▭</div><div>Rectangle</div></div>
+      <div class="tb" id="tool-circle" onclick="setTool('circle')"><div class="ti">○</div><div>Ellipse</div></div>
+      <div class="tb" id="tool-polygon" onclick="setTool('polygon')"><div class="ti">⬡</div><div>Polygon</div></div>
+    </div>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Shape Presets <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);font-size:9px">(click to place)</span></div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Custom Rectangle</div>
+    <div class="fr"><label>Width mm</label><input type="number" id="cw" value="200" min="40" step="40"></div>
+    <div class="fr"><label>Height mm</label><input type="number" id="ch" value="160" min="40" step="40"></div>
+    <div class="fr"><label>Offset X</label><input type="number" id="cx" value="0" step="40"></div>
+    <div class="fr"><label>Offset Y</label><input type="number" id="cy" value="0" step="40"></div>
+    <button class="ab" onclick="addCRect()">Use This Shape</button>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Custom Ellipse</div>
+    <div class="fr"><label>Rx mm</label><input type="number" id="erx" value="100" min="20"></div>
+    <div class="fr"><label>Ry mm</label><input type="number" id="ery" value="80" min="20"></div>
+    <div class="fr"><label>Cx mm</label><input type="number" id="ecx" value="0"></div>
+    <div class="fr"><label>Cy mm</label><input type="number" id="ecy" value="0"></div>
+    <button class="ab" onclick="addCEllipse()">Use This Shape</button>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Display Options</div>
+    <div class="tr"><label>Hole count</label><label class="tgl"><input type="checkbox" id="shc" checked onchange="redraw()"><span class="tgls"></span></label></div>
+    <div class="tr"><label>Grid overlay</label><label class="tgl"><input type="checkbox" id="shg" checked onchange="redraw()"><span class="tgls"></span></label></div>
+    <div class="tr"><label>Shape outlines</label><label class="tgl"><input type="checkbox" id="sho" checked onchange="redraw()"><span class="tgls"></span></label></div>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Keyboard Shortcuts</div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:10px;align-items:center">
+      <kbd class="kbd">Del</kbd><span style="color:var(--text3)">Remove shape</span>
+      <kbd class="kbd">Esc</kbd><span style="color:var(--text3)">Deselect</span>
+      <kbd class="kbd">↑↓←→</kbd><span style="color:var(--text3)">Nudge 40mm</span>
+      <kbd class="kbd">Ctrl+Z</kbd><span style="color:var(--text3)">Undo</span>
+      <kbd class="kbd">Ctrl+A</kbd><span style="color:var(--text3)">Select shape</span>
+      <kbd class="kbd">S</kbd><span style="color:var(--text3)">Select tool</span>
+      <kbd class="kbd">R</kbd><span style="color:var(--text3)">Rectangle tool</span>
+      <kbd class="kbd">E</kbd><span style="color:var(--text3)">Ellipse tool</span>
+    </div>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas-area" onclick="closeEM()">
+  <div id="cwrap"><canvas id="bc"></canvas><canvas id="oc"></canvas></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="rp">
+  <div class="ps">
+    <div class="pt">Active Shape <span id="scount" class="ok2">0</span></div>
+    <div id="olist"></div>
+    <div id="oempty" class="sempty" style="padding:24px 16px"><div style="font-size:24px;margin-bottom:8px;opacity:.4">⬡</div><strong style="color:var(--text2);display:block;margin-bottom:4px">No shape yet</strong>Click a preset shape on the left,<br>or use the draw tools above.</div>
+  </div>
+
+  <div class="ps" id="props-panel" style="display:none">
+    <div class="pt">Properties</div>
+    <div id="props-content"></div>
+  </div>
+
+  <div class="ps" id="hole-panel" style="display:none">
+    <div class="pt">Hole Controls</div>
+    <div id="hole-content"></div>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Fill Color</div>
+    <div class="cg" id="cgrid"></div>
+  </div>
+
+  <div class="ps">
+    <div class="pt">Summary</div>
+    <div id="stats" style="font-family:var(--mono);font-size:10px;color:var(--text2);line-height:2.2"></div>
+  </div>
+</div>
+
+<div id="sb">
+  <span id="cpos">x: — &nbsp;y: —</span>
+  <span id="smsg">Ready — select a shape from the presets to begin</span>
+  <div style="flex:1"></div>
+  <span style="color:var(--text3);font-size:10px">v1.0 · IKEA Skadis spec: 5×15mm holes · 40mm pitch</span>
+  <span id="zlbl" style="margin-left:12px">75%</span>
+</div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="mbg" id="hmodal">
+  <div class="modal wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px"><div style="background:var(--accent);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px">⬡</div><h3 style="margin-bottom:0">SkadisCAD Help &amp; Guide</h3></div>
+      <button class="rbtn" onclick="closeHelp()" style="font-size:14px;padding:2px 8px">✕</button>
+    </div>
+    <div class="htabs">
+      <button class="htab active" onclick="showTab('basics')">Basics</button>
+      <button class="htab" onclick="showTab('shapes')">Shapes</button>
+      <button class="htab" onclick="showTab('holes')">Hole Controls</button>
+
+      <button class="htab" onclick="showTab('export')">Export</button>
+    </div>
+
+    <div class="hpane active" id="tab-basics">
+      <div class="hrow"><div class="hico">↖</div><div><div class="htitle">Select &amp; Move</div><div class="hdesc">Click the <strong>Select</strong> tool then click any shape to select it. Drag to reposition. Use arrow keys <span class="hkbd">↑</span><span class="hkbd">↓</span><span class="hkbd">←</span><span class="hkbd">→</span> to nudge one 40mm grid step at a time.</div></div></div>
+      <div class="hrow"><div class="hico">📐</div><div><div class="htitle">Board size</div><div class="hdesc">Pick a standard IKEA Skadis size from the <strong>Board</strong> dropdown in the toolbar, or choose <em>Custom…</em> and enter exact mm dimensions.</div></div></div>
+      <div class="hrow"><div class="hico">🔍</div><div><div class="htitle">Zoom &amp; Snap</div><div class="hdesc">Change zoom with the <strong>Scale</strong> dropdown. <strong>Snap</strong> controls whether shapes align to the 40mm hole grid, half-grid (20mm), or move freely.</div></div></div>
+      <div class="hrow"><div class="hico">🎨</div><div><div class="htitle">Fill color</div><div class="hdesc">Select a shape then click a swatch in the <strong>Fill Color</strong> panel (right side) to color-code different regions.</div></div></div>
+      <div class="htip"><strong>Tip:</strong> <span class="hkbd">Ctrl+Z</span> undoes the last action. <span class="hkbd">Del</span> removes the selected shape. <span class="hkbd">Esc</span> deselects. <span class="hkbd">Ctrl+A</span> selects the topmost shape.</div>
+    </div>
+
+    <div class="hpane" id="tab-shapes">
+      <div class="hrow"><div class="hico">⬡</div><div><div class="htitle">Preset shapes</div><div class="hdesc">Click any preset in the left panel to instantly add it centered on the board. Presets include full boards, rectangles, strips, circles, ovals, hexagons, L-shapes, T-slots, and arches.</div></div></div>
+      <div class="hrow"><div class="hico">▭</div><div><div class="htitle">Draw tools</div><div class="hdesc">Choose <strong>Rectangle</strong>, <strong>Ellipse</strong>, or <strong>Polygon</strong> from the Tools section, then drag on the canvas to draw. The shape snaps to the current snap mode.</div></div></div>
+      <div class="hrow"><div class="hico">📏</div><div><div class="htitle">Custom dimensions</div><div class="hdesc">Enter exact mm values in the <strong>Custom Rectangle</strong> or <strong>Custom Ellipse</strong> sections and click Add to place a precisely sized shape.</div></div></div>
+      <div class="hrow"><div class="hico">📋</div><div><div class="htitle">Properties</div><div class="hdesc">Select a shape and edit its X, Y, width, and height in the <strong>Properties</strong> panel on the right. Values snap to the grid step you enter.</div></div></div>
+      <div class="htip"><strong>Tip:</strong> Shapes are stacked in the order shown in the Shapes list. The topmost shape in the list is hit-tested last (appears on top visually).</div>
+    </div>
+
+    <div class="hpane" id="tab-holes">
+      <div class="hrow"><div class="hico">⊕</div><div><div class="htitle">Center holes on shape</div><div class="hdesc">Resets the hole grid origin to the exact center of the selected shape. The grid is always anchored to the center and radiates outward — this snaps it back after any offset.</div></div></div>
+      <div class="hrow"><div class="hico">⬡</div><div><div class="htitle">Stagger rows</div><div class="hdesc">Toggle on to offset every other row by half a grid step (20mm at 40mm pitch), creating a honeycomb pattern. Hole size and spacing remain IKEA-spec compliant.</div></div></div>
+      <div class="hrow"><div class="hico">±</div><div><div class="htitle">Hole count — fewer / more</div><div class="hdesc">The <strong>− fewer</strong> button insets the placement boundary by 20mm so outer holes disappear. <strong>+ more</strong> extends the boundary by 20mm so additional holes appear near the edges. Hole size and 40mm pitch never change. A dashed amber rectangle shows the active boundary.</div></div></div>
+      <div class="hrow"><div class="hico">↔</div><div><div class="htitle">Offset X / Y</div><div class="hdesc">Shifts the entire hole grid relative to the shape center without moving the shape. Use the nudge buttons to move by one full grid step, or type a precise mm value. An orange crosshair marks the shifted grid origin.</div></div></div>
+      <div class="hrow"><div class="hico">📐</div><div><div class="htitle">Grid step</div><div class="hdesc">Changes the pitch between holes for that shape only. Default is 40mm (IKEA standard). Increase for sparser layouts, decrease for denser ones. Hole size stays at 5×15mm.</div></div></div>
+      <div class="htip"><strong>Tip:</strong> All hole controls are per-shape — each shape on the board can have its own independent stagger, offset, count, and grid step settings.</div>
+    </div>
+
+    <div class="hpane" id="tab-export">
+      <div class="hrow"><div class="hico">📐</div><div><div class="htitle">SVG</div><div class="hdesc">Best for laser cutters (Lightburn, RDWorks), Cricut, Silhouette, and direct browser use. Fully scalable, includes exact pill-shaped holes with correct mm dimensions in the viewBox.</div></div></div>
+      <div class="hrow"><div class="hico">📏</div><div><div class="htitle">DXF</div><div class="hdesc">Standard format for AutoCAD, Fusion 360, VCarve, Carbide Create, and most CAM software. Holes are exported as precise closed polylines. Layers: OUTLINE (shape boundary), HOLES (pill cutouts). Compatible with AutoCAD, Fusion 360, VCarve, and all major CAM software.</div></div></div>
+      <div class="hrow"><div class="hico">⚙</div><div><div class="htitle">G-Code (.nc)</div><div class="hdesc">Ready-to-run CNC toolpath. Configured for 5mm cut depth, 1200mm/min feed, 300mm/min plunge, 18000 RPM spindle. Edit the header constants to match your machine and material.</div></div></div>
+      <div class="hrow"><div class="hico">🖨</div><div><div class="htitle">PDF Template</div><div class="hdesc">Opens a print dialog with the design scaled to exact 1:1 mm dimensions. Use this to print a drilling template on paper and transfer hole positions manually.</div></div></div>
+      <div class="hrow"><div class="hico">🖼</div><div><div class="htitle">PNG Preview</div><div class="hdesc">Exports a 4× high-resolution raster image of the board. Useful for documentation, sharing, or previewing the layout. Not suitable for cutting — use SVG or DXF for that.</div></div></div>
+      <div class="htip"><strong>Tip:</strong> For laser cutting, use <strong>SVG</strong>. For CNC routing with CAM software, use <strong>DXF</strong>. For direct machine control without CAM, use <strong>G-Code</strong>.</div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:12px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:10px;color:var(--text3);line-height:1.6">
+        <strong style="color:var(--text2)">SkadisCAD v1.0</strong> · Free to use &amp; distribute<br>
+        Designed for IKEA Skadis pegboard system · Not affiliated with IKEA<br>
+        Hole spec: 5×15mm pills · 40mm grid pitch · ≤5mm material
+      </div>
+      <button class="mbtn prim" onclick="closeHelp()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────
+const HW=5,HH=15,HR=2.5,GRID=40;
+const BPRESETS={'36x56':{w:360,h:560},'56x56':{w:560,h:560},'76x56':{w:760,h:560},'56x111':{w:560,h:1110}};
+const SPRESETS=[
+  // Board presets
+  {name:'56×56',type:'rect',w:560,h:560,icon:'▪',color:'#1a2f42'},
+  {name:'36×56',type:'rect',w:360,h:560,icon:'▪',color:'#1a2f42'},
+  {name:'Wide',type:'rect',w:360,h:120,icon:'▭',color:'#1e3a5a'},
+  {name:'Tall',type:'rect',w:120,h:360,icon:'▯',color:'#1e3a5a'},
+  {name:'Strip',type:'rect',w:560,h:80,icon:'═',color:'#1e3050'},
+  // Basic shapes from screenshot
+  {name:'Circle',type:'ellipse',rx:120,ry:120,icon:'○',color:'#1e3a4a'},
+  {name:'Ellipse',type:'ellipse',rx:150,ry:90,icon:'⬭',color:'#1e3a4a'},
+  {name:'Oval',type:'oval',w:200,h:280,icon:'⬯',color:'#1e3a4a'},
+  {name:'Square',type:'rect',w:200,h:200,icon:'□',color:'#1e3a5a'},
+  {name:'Rectangle',type:'rect',w:280,h:180,icon:'▭',color:'#1e3a5a'},
+  {name:'Trapezium',type:'trapezium',w:240,h:160,topW:140,icon:'⏢',color:'#1e2a3a'},
+  {name:'Parallelogram',type:'parallelogram',w:240,h:160,skew:60,icon:'▱',color:'#2a3a1e'},
+  {name:'Rhombus',type:'rhombus',w:160,h:200,icon:'◇',color:'#3a1e2a'},
+  {name:'Kite',type:'kite',w:160,h:240,icon:'⬧',color:'#1e3a2a'},
+  {name:'Triangle',type:'triangle',w:240,h:200,icon:'△',color:'#302010'},
+  {name:'Right △',type:'righttri',w:240,h:200,icon:'◺',color:'#2a1a10'},
+  {name:'Scalene △',type:'scalene',w:240,h:200,icon:'▷',color:'#201a10'},
+  // Polygons
+  {name:'Pentagon',type:'polygon',sides:5,r:120,icon:'⬠',color:'#201a40'},
+  {name:'Hexagon',type:'polygon',sides:6,r:120,icon:'⬡',color:'#302060'},
+  {name:'Heptagon',type:'polygon',sides:7,r:120,icon:'⬡',color:'#282055'},
+  {name:'Octagon',type:'polygon',sides:8,r:120,icon:'⯃',color:'#201a40'},
+  {name:'Nonagon',type:'polygon',sides:9,r:120,icon:'⬡',color:'#281840'},
+  {name:'Decagon',type:'polygon',sides:10,r:120,icon:'⬡',color:'#201440'},
+  // Special shapes
+  {name:'Star',type:'star',r:120,ir:50,pts:5,icon:'★',color:'#3a2a10'},
+  {name:'Heart',type:'heart',w:200,h:200,icon:'♥',color:'#3a1020'},
+  {name:'Cross',type:'cross',w:200,h:200,arm:60,icon:'✚',color:'#1a3a1a'},
+  {name:'Pie',type:'pie',r:120,startA:0,endA:270,icon:'◔',color:'#2a1a3a'},
+  {name:'Arrow',type:'arrow',w:240,h:160,headW:120,headH:160,icon:'➤',color:'#1a1a3a'},
+  // Complex presets
+  {name:'L-shape',type:'lshape',w:280,h:280,legW:80,icon:'⌐',color:'#1e3a2a'},
+  {name:'T-slot',type:'tshape',w:360,h:200,stemH:80,icon:'⊤',color:'#3a2010'},
+  {name:'Arch',type:'arch',w:280,h:200,icon:'⌢',color:'#301a30'},
+];
+const COLORS=['#1a3a5c','#1c3a3c','#2a3a1c','#3c2a1c','#3c1c2a','#2a1c3c',
+  '#2e5a8a','#2e7a7c','#4a7a2e','#7a4a2e','#7a2e4a','#4a2e7a',
+  '#1a4a6b','#5a3a1a','#3a5a1a','#5a1a3a','#1a5a3a','#3a1a5a'];
+
+// ── STATE ─────────────────────────────────────────────────────
+let board={w:560,h:560},zoom=.75,snapMode='hole';
+let shapes=[],selId=null,tool='select';
+let drawing=false,drawStart=null,idCtr=0;
+let hist=[],colorMap={},holeOv={};
+let imgStore={};
+
+// ── CANVAS ────────────────────────────────────────────────────
+const bc=document.getElementById('bc'),oc=document.getElementById('oc');
+const bx=bc.getContext('2d'),ox=oc.getContext('2d');
+
+function initCanvas(){
+  const pw=Math.round(board.w*zoom),ph=Math.round(board.h*zoom);
+  bc.width=pw;bc.height=ph;oc.width=pw;oc.height=ph;
+  bc.style.width=pw+'px';bc.style.height=ph+'px';
+  oc.style.width=pw+'px';oc.style.height=ph+'px';
+}
+
+function m2p(mm){return mm*zoom}
+function p2m(px){return px/zoom}
+function snG(mm,m=1){const s=GRID*m;return Math.round(mm/s)*s}
+function snP(x,y){
+  if(snapMode==='hole')return{x:snG(x),y:snG(y)};
+  if(snapMode==='half')return{x:snG(x,.5),y:snG(y,.5)};
+  return{x,y};
+}
+
+// ── HOLES ─────────────────────────────────────────────────────
+function getHoles(s){
+  const ov=holeOv[s.id]||{};
+  const offX=ov.offsetX||0, offY=ov.offsetY||0;
+  const gs=ov.gridStep||GRID;
+  const stagger=ov.stagger||false;
+  // margin>0 = fewer holes (inset boundary), margin<0 = more holes (extend boundary)
+  const margin=ov.margin||0;
+  const b=getBounds(s); if(!b) return [];
+  const{x,y,w,h}=b;
+  // Effective placement area
+  const ex=x+margin, ey=y+margin, ew=w-margin*2, eh=h-margin*2;
+  if(ew<=0||eh<=0) return [];
+  const cx=ex+ew/2+offX, cy=ey+eh/2+offY;
+  const nx=Math.ceil((ew/2+Math.abs(offX))/gs)+2;
+  const ny=Math.ceil((eh/2+Math.abs(offY))/gs)+2;
+  const holes=[];
+  for(let ix=-nx;ix<=nx;ix++) for(let iy=-ny;iy<=ny;iy++){
+    const staggerShift = stagger ? (Math.abs(iy)%2!==0 ? gs/2 : 0) : 0;
+    const hx=cx+ix*gs+staggerShift, hy=cy+iy*gs;
+    if(hx<ex||hx>ex+ew||hy<ey||hy>ey+eh) continue;
+    if(ptIn({x:hx,y:hy},s)) holes.push({x:hx,y:hy});
+  }
+  return holes;
+}
+
+function getBounds(s){
+  switch(s.type){
+    case'rect':case'lshape':case'tshape':case'arch':case'image':
+    case'trapezium':case'parallelogram':case'rhombus':case'kite':
+    case'triangle':case'righttri':case'scalene':case'oval':
+    case'star':case'heart':case'crescent':case'cross':case'arrow':
+      return{x:s.x,y:s.y,w:s.w,h:s.h};
+    case'pie':return{x:s.cx-s.r,y:s.cy-s.r,w:s.r*2,h:s.r*2};
+    case'ellipse':return{x:s.cx-s.rx,y:s.cy-s.ry,w:s.rx*2,h:s.ry*2};
+    case'polygon':{const p=polyPts(s),xs=p.map(v=>v.x),ys=p.map(v=>v.y),mx=Math.min(...xs),my=Math.min(...ys);return{x:mx,y:my,w:Math.max(...xs)-mx,h:Math.max(...ys)-my};}
+  }
+  return null;
+}
+
+function ptIn(pt,s){
+  switch(s.type){
+    case'rect':return pt.x>=s.x&&pt.x<=s.x+s.w&&pt.y>=s.y&&pt.y<=s.y+s.h;
+    case'ellipse':{const dx=(pt.x-s.cx)/s.rx,dy=(pt.y-s.cy)/s.ry;return dx*dx+dy*dy<=1;}
+    case'polygon':return ptInPoly(pt,polyPts(s));
+    case'lshape':{const lw=s.legW||s.w/2,inF=pt.x>=s.x&&pt.x<=s.x+s.w&&pt.y>=s.y&&pt.y<=s.y+s.h;return inF&&!(pt.x>s.x+lw&&pt.y<s.y+s.h-lw);}
+    case'tshape':{const sh=s.stemH||s.h/2,sw=s.w/3,sx=s.x+(s.w-sw)/2;return(pt.x>=s.x&&pt.x<=s.x+s.w&&pt.y>=s.y&&pt.y<=s.y+sh)||(pt.x>=sx&&pt.x<=sx+sw&&pt.y>=s.y&&pt.y<=s.y+s.h);}
+    case'arch':{if(!(pt.x>=s.x&&pt.x<=s.x+s.w&&pt.y>=s.y&&pt.y<=s.y+s.h))return false;const ah=s.h*.55;if(pt.y<s.y+ah){const dx=(pt.x-s.x-s.w/2)/(s.w/2),dy=(pt.y-s.y-ah)/ah;return dx*dx+dy*dy<=1;}return true;}
+    case'oval':{const cx=s.x+s.w/2,cy=s.y+s.h/2,rx=s.w/2,ry=s.h/2;const dx=(pt.x-cx)/rx,dy=(pt.y-cy)/ry;return dx*dx+dy*dy<=1;}
+    case'trapezium':{const tw=s.topW||s.w*.6,off=(s.w-tw)/2,t=s.y,b2=s.y+s.h;const pct=(pt.y-t)/s.h;const lx=s.x+off*pct,rx2=s.x+s.w-off*pct;return pt.y>=t&&pt.y<=b2&&pt.x>=lx&&pt.x<=rx2;}
+    case'parallelogram':{const sk=s.skew||s.w*.25;const t=s.y,b2=s.y+s.h;const pct=(pt.y-t)/s.h;const lx=s.x+sk-sk*pct*2,rx2=lx+s.w;return pt.y>=t&&pt.y<=b2&&pt.x>=lx&&pt.x<=rx2;}
+    case'rhombus':{const cx2=s.x+s.w/2,cy2=s.y+s.h/2;return Math.abs((pt.x-cx2)/(s.w/2))+Math.abs((pt.y-cy2)/(s.h/2))<=1;}
+    case'kite':{const cx2=s.x+s.w/2,cy2=s.y+s.h/2;const topH=s.h*.35;if(pt.y<=cy2){const t=ptInPoly(pt,[{x:cx2,y:s.y},{x:s.x+s.w,y:cy2-topH/2+topH},{x:s.x,y:cy2-topH/2+topH}]);return t;}else{const dx=Math.abs(pt.x-cx2)/(s.w/2);const dy=(pt.y-cy2)/(s.h/2);return dx+dy<=1;}}
+    case'triangle':{return ptInPoly(pt,[{x:s.x+s.w/2,y:s.y},{x:s.x+s.w,y:s.y+s.h},{x:s.x,y:s.y+s.h}]);}
+    case'righttri':{return ptInPoly(pt,[{x:s.x,y:s.y},{x:s.x+s.w,y:s.y+s.h},{x:s.x,y:s.y+s.h}]);}
+    case'scalene':{return ptInPoly(pt,[{x:s.x+s.w*.25,y:s.y},{x:s.x+s.w,y:s.y+s.h},{x:s.x,y:s.y+s.h}]);}
+    case'star':{const pts2=starPts(s);return ptInPoly(pt,pts2);}
+    case'heart':{const cx2=s.x+s.w/2,cy2=s.y+s.h/2;const nx=(pt.x-cx2)/(s.w/2),ny=(pt.y-cy2+s.h*.1)/(s.h/2);return nx*nx+ny*ny-1<=Math.abs(nx)*.8-ny*.6;}
+    case'crescent':{const cx2=s.x+s.w/2,cy2=s.y+s.h/2,r2=s.w/2;const d1=(pt.x-cx2)**2+(pt.y-cy2)**2<=r2**2;const cx3=cx2+r2*.35,d2=(pt.x-cx3)**2+(pt.y-cy2)**2<=r2**2*.75;return d1&&!d2;}
+    case'cross':{const arm=s.arm||s.w/3,cx2=s.x+s.w/2,cy2=s.y+s.h/2;return(pt.x>=cx2-arm/2&&pt.x<=cx2+arm/2&&pt.y>=s.y&&pt.y<=s.y+s.h)||(pt.y>=cy2-arm/2&&pt.y<=cy2+arm/2&&pt.x>=s.x&&pt.x<=s.x+s.w);}
+    case'pie':{const a1=s.startA*Math.PI/180,a2=s.endA*Math.PI/180,dx=pt.x-s.cx,dy=pt.y-s.cy;if(dx*dx+dy*dy>s.r*s.r)return false;let a=Math.atan2(dy,dx);if(a<a1)a+=2*Math.PI;return a<=a2;}
+    case'arrow':{const hw=s.headW||s.w*.5,hh=s.headH||s.h,bodyH=s.h*.35,cx2=s.x+s.w/2,hy=s.y+s.h-hh;return(pt.y>=hy&&ptInPoly(pt,[{x:s.x+s.w-hw,y:hy},{x:s.x+s.w,y:s.y+s.h/2},{x:s.x+s.w-hw,y:hy+hh}]))||(pt.x>=s.x&&pt.x<=s.x+s.w-hw&&pt.y>=s.y+s.h/2-bodyH/2&&pt.y<=s.y+s.h/2+bodyH/2);}
+    case'image':{
+      const im=imgStore[s.id];
+      // Always check bounding rect first
+      if(!(pt.x>=s.x&&pt.x<=s.x+s.w&&pt.y>=s.y&&pt.y<=s.y+s.h))return false;
+      if(!im?.maskCanvas)return true; // no mask = full rect
+      const mc=im.maskCanvas;
+      const rx=(pt.x-s.x)/s.w*mc.width, ry=(pt.y-s.y)/s.h*mc.height;
+      if(rx<0||ry<0||rx>=mc.width||ry>=mc.height)return false;
+      try{return mc.getContext('2d').getImageData(Math.floor(rx),Math.floor(ry),1,1).data[3]>128;}
+      catch(e){return true;} // tainted canvas fallback: allow all
+    }
+  }
+  return false;
+}
+
+function starPts(s){
+  const pts=[],n=s.pts||5,R=s.r||s.w/2,ir=s.ir||R*.4;
+  const cx=s.cx||(s.x+s.w/2),cy=s.cy||(s.y+s.h/2);
+  for(let i=0;i<n*2;i++){
+    const a=i*Math.PI/n-Math.PI/2;
+    const r2=i%2===0?R:ir;
+    pts.push({x:cx+Math.cos(a)*r2,y:cy+Math.sin(a)*r2});
+  }
+  return pts;
+}
+function polyPts(s){return Array.from({length:s.sides},(_,i)=>{const a=(i/s.sides)*Math.PI*2-Math.PI/2;return{x:s.cx+Math.cos(a)*s.r,y:s.cy+Math.sin(a)*s.r};});}
+function ptInPoly(pt,pts){let ins=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const{x:xi,y:yi}=pts[i],{x:xj,y:yj}=pts[j];if(((yi>pt.y)!==(yj>pt.y))&&pt.x<(xj-xi)*(pt.y-yi)/(yj-yi)+xi)ins=!ins;}return ins;}
+
+// ── IMAGE IMPORT ───────────────────────────────────────────────
+// ── DRAW ─────────────────────────────────────────────────────
+// Context-explicit versions for offscreen canvas use
+function drawPillCtx(ctx,cx,cy){drawPill(ctx,cx,cy);}
+function drawShpCtx(ctx,s){
+  // Temporarily swap bx so drawShp works on arbitrary ctx
+  const orig=bx;
+  // drawShp uses m2p which is zoom-based — correct
+  // We re-implement inline for the offscreen ctx
+  const p=m2p.bind(null);
+  switch(s.type){
+    case'rect':case'image':ctx.rect(m2p(s.x),m2p(s.y),m2p(s.w),m2p(s.h));break;
+    case'ellipse':ctx.ellipse(m2p(s.cx),m2p(s.cy),m2p(s.rx),m2p(s.ry),0,0,Math.PI*2);break;
+    default:{const b=getBounds(s);if(b)ctx.rect(m2p(b.x),m2p(b.y),m2p(b.w),m2p(b.h));}
+  }
+}
+
+function drawPill(ctx,cx,cy){
+  const hw=m2p(HW/2),hh=m2p(HH/2),r=m2p(HR);
+  const px=m2p(cx)-hw,py=m2p(cy)-hh,pw=hw*2,ph=hh*2;
+  ctx.beginPath();
+  ctx.moveTo(px+r,py);ctx.lineTo(px+pw-r,py);ctx.arcTo(px+pw,py,px+pw,py+r,r);
+  ctx.lineTo(px+pw,py+ph-r);ctx.arcTo(px+pw,py+ph,px+pw-r,py+ph,r);
+  ctx.lineTo(px+r,py+ph);ctx.arcTo(px,py+ph,px,py+ph-r,r);
+  ctx.lineTo(px,py+r);ctx.arcTo(px,py,px+r,py,r);ctx.closePath();
+}
+
+function drawShp(ctx,s){
+  switch(s.type){
+    case'rect':case'image':ctx.rect(m2p(s.x),m2p(s.y),m2p(s.w),m2p(s.h));break;
+    case'ellipse':ctx.ellipse(m2p(s.cx),m2p(s.cy),m2p(s.rx),m2p(s.ry),0,0,Math.PI*2);break;
+    case'polygon':{const p=polyPts(s);ctx.moveTo(m2p(p[0].x),m2p(p[0].y));for(let i=1;i<p.length;i++)ctx.lineTo(m2p(p[i].x),m2p(p[i].y));ctx.closePath();break;}
+    case'lshape':{const lw=s.legW||s.w/2,lh=s.legW||s.w/2,x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h),lp=m2p(lw),lq=m2p(lh);ctx.moveTo(x,y);ctx.lineTo(x+lp,y);ctx.lineTo(x+lp,y+h-lq);ctx.lineTo(x+w,y+h-lq);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'tshape':{const sh=s.stemH||s.h/2,sw=s.w/3,sx2=s.x+(s.w-sw)/2,x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h),sp=m2p(sh),swp=m2p(sw),sxp=m2p(sx2);ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+sp);ctx.lineTo(sxp+swp,y+sp);ctx.lineTo(sxp+swp,y+h);ctx.lineTo(sxp,y+h);ctx.lineTo(sxp,y+sp);ctx.lineTo(x,y+sp);ctx.closePath();break;}
+    case'arch':{const ah=s.h*.55,x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h),ahp=m2p(ah);ctx.moveTo(x,y+ahp);ctx.ellipse(x+w/2,y+ahp,w/2,ahp,0,Math.PI,0);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'oval':{ctx.ellipse(m2p(s.x+s.w/2),m2p(s.y+s.h/2),m2p(s.w/2),m2p(s.h/2),0,0,Math.PI*2);break;}
+    case'trapezium':{const tw=s.topW||s.w*.6,off=(s.w-tw)/2,x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h),to=m2p(off);ctx.moveTo(x+to,y);ctx.lineTo(x+w-to,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'parallelogram':{const sk=m2p(s.skew||s.w*.25),x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(x+sk,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w-sk,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'rhombus':{const x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(x+w/2,y);ctx.lineTo(x+w,y+h/2);ctx.lineTo(x+w/2,y+h);ctx.lineTo(x,y+h/2);ctx.closePath();break;}
+    case'kite':{const cx2=m2p(s.x+s.w/2),y=m2p(s.y),x=m2p(s.x),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(cx2,y);ctx.lineTo(x+w,y+h*.4);ctx.lineTo(cx2,y+h);ctx.lineTo(x,y+h*.4);ctx.closePath();break;}
+    case'triangle':{const x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(x+w/2,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'righttri':{const x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(x,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'scalene':{const x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(x+w*.25,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();break;}
+    case'star':{const pts2=starPts(s);ctx.moveTo(m2p(pts2[0].x),m2p(pts2[0].y));for(let i=1;i<pts2.length;i++)ctx.lineTo(m2p(pts2[i].x),m2p(pts2[i].y));ctx.closePath();break;}
+    case'heart':{const cx2=m2p(s.x+s.w/2),cy2=m2p(s.y+s.h*.55),r2=m2p(s.w/4);ctx.moveTo(cx2,m2p(s.y+s.h*.9));ctx.bezierCurveTo(m2p(s.x-s.w*.1),m2p(s.y+s.h*.5),m2p(s.x),m2p(s.y),cx2-r2,m2p(s.y+s.h*.15));ctx.arc(cx2-r2,m2p(s.y+s.h*.22),r2,Math.PI*1.15,0,false);ctx.arc(cx2+r2,m2p(s.y+s.h*.22),r2,Math.PI,Math.PI*1.85,false);ctx.bezierCurveTo(m2p(s.x+s.w+s.w*.1),m2p(s.y+s.h*.5),cx2,m2p(s.y+s.h*.9),cx2,m2p(s.y+s.h*.9));ctx.closePath();break;}
+    case'crescent':{const cx2=m2p(s.x+s.w/2),cy2=m2p(s.y+s.h/2),r2=m2p(s.w/2);ctx.arc(cx2,cy2,r2,0,Math.PI*2);ctx.closePath();ctx.moveTo(cx2+m2p(s.w*.35)+r2*.87,cy2-r2*.5);ctx.arc(cx2+m2p(s.w*.35),cy2,r2*.87,0,Math.PI*2,true);ctx.closePath();break;}
+    case'cross':{const arm=m2p(s.arm||s.w/3),cx2=m2p(s.x+s.w/2),cy2=m2p(s.y+s.h/2),x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h);ctx.moveTo(cx2-arm/2,y);ctx.lineTo(cx2+arm/2,y);ctx.lineTo(cx2+arm/2,cy2-arm/2);ctx.lineTo(x+w,cy2-arm/2);ctx.lineTo(x+w,cy2+arm/2);ctx.lineTo(cx2+arm/2,cy2+arm/2);ctx.lineTo(cx2+arm/2,y+h);ctx.lineTo(cx2-arm/2,y+h);ctx.lineTo(cx2-arm/2,cy2+arm/2);ctx.lineTo(x,cy2+arm/2);ctx.lineTo(x,cy2-arm/2);ctx.lineTo(cx2-arm/2,cy2-arm/2);ctx.closePath();break;}
+    case'pie':{const a1=s.startA*Math.PI/180,a2=s.endA*Math.PI/180;ctx.moveTo(m2p(s.cx),m2p(s.cy));ctx.arc(m2p(s.cx),m2p(s.cy),m2p(s.r),a1,a2);ctx.closePath();break;}
+    case'arrow':{const x=m2p(s.x),y=m2p(s.y),w=m2p(s.w),h=m2p(s.h),hw=m2p(s.headW||s.w*.5),hh=m2p(s.headH||s.h),bh=h*.35;const hx=x+w-hw,my=y+h/2;ctx.moveTo(x,my-bh/2);ctx.lineTo(hx,my-bh/2);ctx.lineTo(hx,y);ctx.lineTo(x+w,my);ctx.lineTo(hx,y+h);ctx.lineTo(hx,my+bh/2);ctx.lineTo(x,my+bh/2);ctx.closePath();break;}
+  }
+}
+
+function redraw(){
+  bx.clearRect(0,0,bc.width,bc.height);
+  bx.fillStyle='#13202e';bx.fillRect(0,0,bc.width,bc.height);
+  if(v('shg')){bx.strokeStyle='rgba(100,150,180,.06)';bx.lineWidth=.5;for(let x=0;x<=board.w;x+=GRID){bx.beginPath();bx.moveTo(m2p(x),0);bx.lineTo(m2p(x),bc.height);bx.stroke();}for(let y=0;y<=board.h;y+=GRID){bx.beginPath();bx.moveTo(0,m2p(y));bx.lineTo(bc.width,m2p(y));bx.stroke();}}
+  // Board boundary — reference only, never exported
+  bx.save();bx.strokeStyle='rgba(100,150,180,0.25)';bx.lineWidth=1;bx.setLineDash([6,4]);
+  bx.strokeRect(0,0,m2p(board.w),m2p(board.h));
+  bx.setLineDash([]);bx.restore();
+  const showImg=false,showOut=v('sho'),showCnt=v('shc');
+  // Draw board background first (always behind everything)
+  const boardShp=shapes.find(s=>s.isBoard);
+  if(boardShp){
+    bx.save();
+    bx.beginPath();drawShp(bx,boardShp);
+    bx.fillStyle='#162230';bx.fill();
+    // Draw all board holes faintly (background reference)
+    if(boardShp){
+      getHoles(boardShp).forEach(h=>{
+        bx.save();bx.beginPath();drawPill(bx,h.x,h.y);
+        bx.fillStyle='rgba(28,50,68,0.9)';bx.fill();
+        bx.beginPath();drawPill(bx,h.x,h.y);
+        bx.strokeStyle='rgba(100,150,180,0.25)';bx.lineWidth=0.5;bx.stroke();
+        bx.restore();
+      });
+    }
+    bx.restore();
+  }
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    const isSel=s.id===selId;
+    const col=colorMap[s.id]||s.color||'#1e3a5a';
+    const im=imgStore[s.id];
+    bx.save();
+    // For image shapes: composite on offscreen canvas so holes punch cleanly
+    const holes=getHoles(s);
+    if(s.type==='image'&&holes.length){
+      // Offscreen canvas at full board size — same coordinate space
+      const off=document.createElement('canvas');
+      off.width=bc.width;off.height=bc.height;
+      const octx2=off.getContext('2d');
+      // Draw image overlay
+      if(im?.img&&showImg){octx2.globalAlpha=.5;octx2.drawImage(im.img,m2p(s.x),m2p(s.y),m2p(s.w),m2p(s.h));octx2.globalAlpha=1;}
+      // Draw shape fill
+      octx2.beginPath();drawShpCtx(octx2,s);octx2.fillStyle=col+'88';octx2.fill();
+      // Punch holes through with destination-out
+      octx2.globalCompositeOperation='destination-out';
+      holes.forEach(h=>{octx2.beginPath();drawPillCtx(octx2,h.x,h.y);octx2.fillStyle='rgba(0,0,0,1)';octx2.fill();});
+      // Blit offscreen result onto main canvas
+      bx.drawImage(off,0,0);
+      // Draw outline on main canvas
+      if(showOut){bx.beginPath();drawShp(bx,s);bx.strokeStyle=isSel?'#4f8ef7':'rgba(100,160,200,.5)';bx.lineWidth=isSel?2:1;bx.setLineDash(isSel?[4,3]:[]);bx.stroke();bx.setLineDash([]);}
+      // Draw pill outlines on main canvas (visible light rim)
+      holes.forEach(h=>{
+        bx.beginPath();drawPill(bx,h.x,h.y);
+        bx.strokeStyle='rgba(180,215,235,0.8)';bx.lineWidth=.8;bx.stroke();
+      });
+    } else {
+      // Non-image shapes: simple fill + stroke
+      if(s.type==='image'&&im?.img&&showImg){bx.globalAlpha=.5;bx.drawImage(im.img,m2p(s.x),m2p(s.y),m2p(s.w),m2p(s.h));bx.globalAlpha=1;}
+      bx.beginPath();drawShp(bx,s);bx.fillStyle=col;bx.fill();
+      if(showOut){bx.beginPath();drawShp(bx,s);bx.strokeStyle=isSel?'#4f8ef7':'rgba(100,160,200,.5)';bx.lineWidth=isSel?2:1;bx.setLineDash(isSel?[4,3]:[]);bx.stroke();bx.setLineDash([]);}
+      holes.forEach(h=>{
+        bx.beginPath();drawPill(bx,h.x,h.y);bx.fillStyle='#0a161e';bx.fill();
+        bx.beginPath();drawPill(bx,h.x,h.y);bx.strokeStyle='rgba(160,200,220,.7)';bx.lineWidth=.8;bx.stroke();
+      });
+    }
+    bx.restore();
+    // Draw hole grid origin crosshair and margin boundary when selected
+    if(isSel){
+      const ov2=holeOv[s.id]||{};
+      const ox2=ov2.offsetX||0,oy2=ov2.offsetY||0,mg=ov2.margin||0;
+      const bnd=getBounds(s);
+      if(bnd){
+        // Show margin boundary if non-zero
+        if(mg!==0){
+          bx.save();
+          bx.strokeStyle='rgba(240,169,64,0.5)';bx.lineWidth=1;bx.setLineDash([4,4]);
+          bx.strokeRect(m2p(bnd.x+mg),m2p(bnd.y+mg),m2p(bnd.w-mg*2),m2p(bnd.h-mg*2));
+          bx.setLineDash([]);bx.restore();
+        }
+        // Show grid origin crosshair if offset
+        if(ox2!==0||oy2!==0){
+          const gcx=m2p(bnd.x+bnd.w/2+ox2),gcy=m2p(bnd.y+bnd.h/2+oy2);
+          bx.save();bx.strokeStyle='rgba(240,169,64,.9)';bx.lineWidth=1;bx.setLineDash([3,3]);
+          bx.beginPath();bx.moveTo(gcx-10,gcy);bx.lineTo(gcx+10,gcy);bx.stroke();
+          bx.beginPath();bx.moveTo(gcx,gcy-10);bx.lineTo(gcx,gcy+10);bx.stroke();
+          bx.setLineDash([]);bx.restore();
+        }
+      }
+    }
+    if(showCnt&&holes.length){const bnd=getBounds(s);if(bnd){bx.font=`bold ${Math.max(10,m2p(7))}px Inter,sans-serif`;bx.fillStyle='rgba(200,220,230,.55)';bx.textAlign='center';bx.textBaseline='middle';bx.fillText(`${holes.length}⟆`,m2p(bnd.x+bnd.w/2),m2p(bnd.y+bnd.h/2));}}
+  });
+  if(selId){const s=shapes.find(x=>x.id===selId);if(s){const b=getBounds(s);if(b){
+    const pad=5;bx.save();
+    bx.strokeStyle='#4f8ef7';bx.lineWidth=1.5;bx.setLineDash([5,4]);
+    bx.strokeRect(m2p(b.x)-pad,m2p(b.y)-pad,m2p(b.w)+pad*2,m2p(b.h)+pad*2);
+    bx.setLineDash([]);
+    // 8 handles: corners + edge midpoints
+    getResizeHandles(b).forEach(h=>{
+      bx.beginPath();
+      if(h.edge){
+        // Edge handles: small rect
+        bx.rect(m2p(h.x)-4,m2p(h.y)-4,8,8);
+        bx.fillStyle='#fff';bx.fill();
+        bx.strokeStyle='#4f8ef7';bx.lineWidth=1.5;bx.stroke();
+      } else {
+        // Corner handles: filled circle
+        bx.arc(m2p(h.x),m2p(h.y),5,0,Math.PI*2);
+        bx.fillStyle='#4f8ef7';bx.fill();
+        bx.strokeStyle='#fff';bx.lineWidth=1.5;bx.stroke();
+      }
+    });
+    bx.restore();
+  }}}
+  updStats();updOList();
+}
+
+function v(id){return document.getElementById(id).checked}
+
+function updStats(){
+  const nonBoard=shapes.filter(s=>!s.isBoard);
+  const tot=nonBoard.reduce((a,s)=>a+getHoles(s).length,0);
+  const eb=nonBoard.length?getExportBounds():{w:0,h:0};
+  document.getElementById('stats').innerHTML=
+    `Board: <strong style="color:var(--text)">${board.w}×${board.h}</strong> mm<br>`+
+    `Shape: <strong style="color:var(--text)">${nonBoard.length?nonBoard[0].name:'none'}</strong><br>`+
+    `Holes: <strong style="color:var(--ok)">${tot}</strong><br>`+
+    `Export size: <strong style="color:var(--text)">${nonBoard.length?Math.round(eb.w)+'×'+Math.round(eb.h)+' mm':'—'}</strong><br>`+
+    `Material: ≤5 mm thick`;
+  document.getElementById('scount').textContent=nonBoard.length;
+}
+
+// ── OBJECT LIST ───────────────────────────────────────────────
+function updOList(){
+  const list=document.getElementById('olist'),empty=document.getElementById('oempty');
+  if(!shapes.length){list.innerHTML='';empty.style.display='';document.getElementById('props-panel').style.display='none';document.getElementById('hole-panel').style.display='none';return;}
+  empty.style.display='none';
+  list.innerHTML=shapes.filter(s=>!s.isBoard).map(s=>{
+    const holes=getHoles(s).length,sel=s.id===selId?' sel':'',col=colorMap[s.id]||s.color||'#1e3a5a',img=s.type==='image'?' imgshp':'';
+    return`<div class="oi${sel}${img}" onclick="selShape(${s.id})"><div class="oc2" style="background:${col}"></div><div class="on">${s.name}</div><div class="ok2">${holes}⟆</div><div class="od" onclick="event.stopPropagation();remShape(${s.id})">✕</div></div>`;
+  }).join('');
+  if(selId){const s=shapes.find(x=>x.id===selId);if(s){showProps(s);showHoleCtrl(s);}}
+}
+
+function showProps(s){
+  document.getElementById('props-panel').style.display='';
+  const b=getBounds(s),holes=getHoles(s).length;
+  let h=`<div class="pr"><label>Type</label><span class="tag">${s.type}</span></div><div class="pr"><label>Holes</label><span class="tag">${holes}</span></div>`;
+  if(b)h+=`<div class="pr"><label>X mm</label><input type="number" value="${Math.round(b.x)}" step="${GRID}" onchange="mvAbs(${s.id},'x',+this.value)"></div><div class="pr"><label>Y mm</label><input type="number" value="${Math.round(b.y)}" step="${GRID}" onchange="mvAbs(${s.id},'y',+this.value)"></div><div class="pr"><label>W mm</label><input type="number" value="${Math.round(b.w)}" step="${GRID}" onchange="rzShape(${s.id},'w',+this.value)"></div><div class="pr"><label>H mm</label><input type="number" value="${Math.round(b.h)}" step="${GRID}" onchange="rzShape(${s.id},'h',+this.value)"></div>`;
+  if(s.type==='image')h+=`<div class="sep"></div><div class="pr"><label>Threshold</label><input type="range" min="10" max="245" value="${s.threshold||128}" oninput="updThr(${s.id},+this.value)"></div><div class="hint" style="padding-left:54px;margin-top:-4px">Adjust brightness cutoff for hole tracing</div>`;
+  document.getElementById('props-content').innerHTML=h;
+}
+
+function showHoleCtrl(s){
+  document.getElementById('hole-panel').style.display='';
+  const ov=holeOv[s.id]||{};
+  const ox2=ov.offsetX||0, oy2=ov.offsetY||0, gs=ov.gridStep||GRID;
+  const stagger=ov.stagger||false, margin=ov.margin||0;
+  const tot=getHoles(s).length;
+  document.getElementById('hole-content').innerHTML=`
+    <button class="cbtn" onclick="centerHoles(${s.id})"><span>⊕</span> Center holes on shape</button>
+    <div class="sep"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:11px;color:var(--text2)">Stagger rows</span>
+      <label class="tgl"><input type="checkbox" ${stagger?'checked':''} onchange="setOv(${s.id},'stagger',this.checked);showHoleCtrl(shapes.find(x=>x.id===${s.id}))"><span class="tgls"></span></label>
+    </div>
+    <div class="sep"></div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Hole count &nbsp;<span style="color:var(--text3);font-family:var(--mono)">${tot} holes</span></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <button class="hcbtn" onclick="adjMargin(${s.id},${GRID/2})">− fewer</button>
+      <div style="flex:1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text2)">${margin===0?'auto':margin>0?'+'+margin+'mm inset':Math.abs(margin)+'mm extend'}</div>
+      <button class="hcbtn" onclick="adjMargin(${s.id},-${GRID/2})">+ more</button>
+    </div>
+    <div style="display:flex;justify-content:center;margin-bottom:6px">
+      <button class="rbtn" onclick="resetMargin(${s.id})">↺ reset count</button>
+    </div>
+    <div class="hint" style="margin-bottom:6px">Expands or shrinks the hole placement area. Hole size and spacing stay fixed.</div>
+    <div class="sep"></div>
+    <div class="hovr"><label>Offset X mm</label><input type="number" value="${ox2}" step="1" onchange="setOv(${s.id},'offsetX',+this.value)"><button class="rbtn" onclick="resetOff(${s.id})">↺</button></div>
+    <div class="hovr"><label>Offset Y mm</label><input type="number" value="${oy2}" step="1" onchange="setOv(${s.id},'offsetY',+this.value)"></div>
+    <div class="sep"></div>
+    <div class="hovr"><label>Grid step mm</label><input type="number" value="${gs}" min="10" max="200" step="10" onchange="setOv(${s.id},'gridStep',Math.max(10,+this.value))"><button class="rbtn" onclick="resetStep(${s.id})">↺</button></div>
+    <div class="hint">Orange crosshair = grid origin when offset.</div>
+    <div class="nudgeg">
+      <div class="nbtn" onclick="nudge(${s.id},-${GRID},0)">← ${GRID}mm</div>
+      <div class="nbtn" onclick="nudge(${s.id},${GRID},0)">→ ${GRID}mm</div>
+      <div class="nbtn" onclick="nudge(${s.id},0,-${GRID})">↑ ${GRID}mm</div>
+      <div class="nbtn" onclick="nudge(${s.id},0,${GRID})">↓ ${GRID}mm</div>
+    </div>`;
+}
+
+// ── HOLE OVERRIDE ─────────────────────────────────────────────
+function setOv(id,k,v2){if(!holeOv[id])holeOv[id]={};holeOv[id][k]=v2;redraw();}
+function adjMargin(id,delta){
+  if(!holeOv[id])holeOv[id]={};
+  holeOv[id].margin=(holeOv[id].margin||0)+delta;
+  const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();
+}
+function resetMargin(id){if(holeOv[id])holeOv[id].margin=0;const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();}
+function nudge(id,dx,dy){if(!holeOv[id])holeOv[id]={};holeOv[id].offsetX=(holeOv[id].offsetX||0)+dx;holeOv[id].offsetY=(holeOv[id].offsetY||0)+dy;const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();}
+function resetOff(id){if(holeOv[id]){holeOv[id].offsetX=0;holeOv[id].offsetY=0;}const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();}
+function resetStep(id){if(holeOv[id])holeOv[id].gridStep=GRID;const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();}
+function centerHoles(id){if(!holeOv[id])holeOv[id]={};holeOv[id].offsetX=0;holeOv[id].offsetY=0;const s=shapes.find(x=>x.id===id);if(s)showHoleCtrl(s);redraw();setSt('Holes centered on shape');}
+function updThr(id,val){const s=shapes.find(x=>x.id===id);if(!s)return;s.threshold=val;redraw();}
+
+// ── SHAPE MANAGEMENT ─────────────────────────────────────────
+function addShape(s){
+  saveHist();
+  if(!s.isBoard){
+    // Remove any existing non-board shape first (one shape at a time)
+    shapes=shapes.filter(x=>x.isBoard);
+  }
+  s.id=++idCtr;shapes.push(s);selId=s.id;redraw();
+}
+function remShape(id){saveHist();shapes=shapes.filter(s=>s.id!==id);delete colorMap[id];delete holeOv[id];delete imgStore[id];if(selId===id)selId=null;redraw();}
+function selShape(id){selId=id;redraw();}
+function mvAbs(id,ax,val){const s=shapes.find(x=>x.id===id);if(!s)return;const b=getBounds(s);if(!b)return;mvBy(s,ax==='x'?val-b.x:0,ax==='y'?val-b.y:0);redraw();}
+function mvBy(s,dx,dy){if('x'in s)s.x+=dx,s.y+=dy;else s.cx+=dx,s.cy+=dy;}
+function rzShape(id,ax,v2){const s=shapes.find(x=>x.id===id);if(!s)return;if(ax==='w'){'w'in s?s.w=v2:s.rx!=null?s.rx=v2/2:s.r=v2/2;}else{'h'in s?s.h=v2:s.ry!=null?s.ry=v2/2:s.r=v2/2;}redraw();}
+
+function addPreset(i){
+  const p=SPRESETS[i],cx=board.w/2,cy=board.h/2;
+  let s;
+  if(p.type==='ellipse')s={...p,name:p.name,cx,cy};
+  else if(p.type==='polygon'||p.type==='star')s={...p,name:p.name,cx,cy};
+  else if(p.type==='pie')s={...p,name:p.name,cx,cy};
+  else s={...p,name:p.name,x:cx-(p.w||p.r*2)/2,y:cy-(p.h||p.r*2)/2};
+  addShape(s);
+}
+
+function addCRect(){addShape({type:'rect',name:`Rect ${document.getElementById('cw').value}×${document.getElementById('ch').value}`,w:+document.getElementById('cw').value,h:+document.getElementById('ch').value,x:+document.getElementById('cx').value,y:+document.getElementById('cy').value,color:'#1e3a5a'});}
+function addCEllipse(){addShape({type:'ellipse',name:'Ellipse',rx:+document.getElementById('erx').value,ry:+document.getElementById('ery').value,cx:+document.getElementById('ecx').value||board.w/2,cy:+document.getElementById('ecy').value||board.h/2,color:'#1e3a4a'});}
+
+function buildPGrid(){
+  document.getElementById('pgrid').innerHTML=SPRESETS.map((p,i)=>
+    `<div class="pb" onclick="addPreset(${i})" title="Add ${p.name} shape">
+      <div style="font-size:16px;line-height:1.2">${p.icon}</div>
+      <div style="line-height:1.3">${p.name}</div>
+    </div>`
+  ).join('');
+}
+function buildCGrid(){document.getElementById('cgrid').innerHTML=COLORS.map(c=>`<div class="cs" style="background:${c}" onclick="setSCol('${c}')"></div>`).join('');}
+function setSCol(c){if(!selId)return;colorMap[selId]=c;redraw();}
+
+// ── TOOL ─────────────────────────────────────────────────────
+function setTool(t){tool=t;document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('tool-'+t)?.classList.add('active');bc.style.cursor=t==='select'?'default':'crosshair';setSt({select:'Click to select',rect:'Drag to draw rectangle',circle:'Drag to draw ellipse',polygon:'Drag to draw hexagon'}[t]||'Ready');}
+function setSt(m){document.getElementById('smsg').textContent=m;}
+
+// ── MOUSE ─────────────────────────────────────────────────────
+let drag=null,doff=null;
+// Resize state
+let resizeHandle=null; // {type, anchor, s, b0, mx0, my0}
+const HANDLE_R=8; // hit radius in px
+// Returns 8 resize handles [{x,y,cur,edge,corner}] for a bounding box
+function getResizeHandles(b){
+  const mx=b.x+b.w/2, my=b.y+b.h/2;
+  return [
+    {x:b.x,   y:b.y,   cur:'nw-resize', corner:'nw'},
+    {x:mx,    y:b.y,   cur:'n-resize',  edge:'n'},
+    {x:b.x+b.w,y:b.y,  cur:'ne-resize', corner:'ne'},
+    {x:b.x+b.w,y:my,   cur:'e-resize',  edge:'e'},
+    {x:b.x+b.w,y:b.y+b.h,cur:'se-resize',corner:'se'},
+    {x:mx,    y:b.y+b.h,cur:'s-resize', edge:'s'},
+    {x:b.x,   y:b.y+b.h,cur:'sw-resize',corner:'sw'},
+    {x:b.x,   y:my,    cur:'w-resize',  edge:'w'},
+  ];
+}
+
+// Hit-test handles, return matched handle or null
+function hitHandle(mx,my,b){
+  const hitR=HANDLE_R/zoom;
+  for(const h of getResizeHandles(b)){
+    if(Math.abs(mx-h.x)<hitR&&Math.abs(my-h.y)<hitR) return h;
+  }
+  return null;
+}
+
+// Apply resize: given original bounds b0, mouse start mx0/my0, current mx/my, handle
+function applyResize(s,b0,h,mx0,my0,mx,my){
+  const sp=snP(mx,my);
+  let nx=b0.x, ny=b0.y, nw=b0.w, nh=b0.h;
+  const c=h.corner||h.edge;
+  // Horizontal
+  if(c==='nw'||c==='w'||c==='sw'){nx=Math.min(sp.x,b0.x+b0.w-GRID);nw=b0.x+b0.w-nx;}
+  if(c==='ne'||c==='e'||c==='se'){nw=Math.max(GRID,sp.x-b0.x);}
+  // Vertical
+  if(c==='nw'||c==='n'||c==='ne'){ny=Math.min(sp.y,b0.y+b0.h-GRID);nh=b0.y+b0.h-ny;}
+  if(c==='sw'||c==='s'||c==='se'){nh=Math.max(GRID,sp.y-b0.y);}
+  nw=Math.max(GRID,nw); nh=Math.max(GRID,nh);
+  // Apply to shape geometry — all types that store x/y/w/h
+  switch(s.type){
+    case'rect':case'image':case'lshape':case'tshape':case'arch':
+    case'oval':case'trapezium':case'parallelogram':case'rhombus':
+    case'kite':case'triangle':case'righttri':case'scalene':
+    case'heart':case'crescent':case'cross':case'arrow':
+      s.x=nx;s.y=ny;s.w=nw;s.h=nh; break;
+    case'ellipse':
+      s.cx=nx+nw/2;s.cy=ny+nh/2;s.rx=nw/2;s.ry=nh/2; break;
+    case'polygon':case'star':
+      s.cx=nx+nw/2;s.cy=ny+nh/2;s.r=Math.min(nw,nh)/2;
+      if(s.type==='star')s.ir=s.r*.4; break;
+    case'pie':
+      s.cx=nx+nw/2;s.cy=ny+nh/2;s.r=Math.min(nw,nh)/2; break;
+  }
+}
+
+// Update cursor based on what's under the mouse
+function updCursor(mx,my){
+  if(tool!=='select'){bc.style.cursor='crosshair';return;}
+  if(selId){
+    const s=shapes.find(x=>x.id===selId);
+    if(s){const b=getBounds(s);if(b){const h=hitHandle(mx,my,b);if(h){bc.style.cursor=h.cur;return;}}}
+  }
+  // Check if over any shape
+  for(let i=shapes.length-1;i>=0;i--){if(ptIn({x:mx,y:my},shapes[i])){bc.style.cursor='move';return;}}
+  bc.style.cursor='default';
+}
+
+bc.addEventListener('mousedown',e=>{
+  const r=bc.getBoundingClientRect(),mx=p2m(e.clientX-r.left),my=p2m(e.clientY-r.top);
+  if(tool==='select'){
+    // Check resize handles first (only on selected shape)
+    if(selId){
+      const s=shapes.find(x=>x.id===selId);
+      if(s){const b=getBounds(s);if(b){const h=hitHandle(mx,my,b);if(h){
+        saveHist();
+        resizeHandle={h,s,b0:{...b},mx0:mx,my0:my};
+        drag=null;
+        return;
+      }}}
+    }
+    // Then hit-test shapes for move
+    let hit=null;
+    for(let i=shapes.length-1;i>=0;i--)if(ptIn({x:mx,y:my},shapes[i])){hit=shapes[i];break;}
+    if(hit){selId=hit.id;const b=getBounds(hit);drag=hit;doff={x:mx-b.x,y:my-b.y};}
+    else{selId=null;drag=null;}
+    redraw();
+  } else{drawing=true;drawStart=snP(mx,my);}
+});
+bc.addEventListener('mousemove',e=>{
+  const r=bc.getBoundingClientRect(),mx=p2m(e.clientX-r.left),my=p2m(e.clientY-r.top);
+  document.getElementById('cpos').textContent=`x: ${Math.round(mx)} mm  y: ${Math.round(my)} mm`;
+  if(resizeHandle&&e.buttons===1){
+    const{h,s,b0}=resizeHandle;
+    applyResize(s,b0,h,resizeHandle.mx0,resizeHandle.my0,mx,my);
+    redraw();return;
+  }
+  if(drag&&e.buttons===1){const sp=snP(mx-doff.x,my-doff.y),b=getBounds(drag);mvBy(drag,sp.x-b.x,sp.y-b.y);redraw();return;}
+  if(drawing&&e.buttons===1){const sp=snP(mx,my);drawPrev(drawStart,sp);}
+  updCursor(mx,my);
+});
+bc.addEventListener('mouseup',e=>{
+  const r=bc.getBoundingClientRect(),mx=p2m(e.clientX-r.left),my=p2m(e.clientY-r.top);
+  if(drawing){drawing=false;ox.clearRect(0,0,oc.width,oc.height);if(tool!=='select')finDraw(drawStart,snP(mx,my));drawStart=null;}
+  if(resizeHandle){const s=resizeHandle.s;resizeHandle=null;if(s)showProps(s);redraw();}
+  drag=null;
+});
+
+function drawPrev(a,b){
+  ox.clearRect(0,0,oc.width,oc.height);ox.strokeStyle='#4f8ef7';ox.lineWidth=1.5;ox.setLineDash([4,3]);ox.fillStyle='rgba(79,142,247,.1)';
+  const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);
+  if(tool==='rect'){ox.beginPath();ox.rect(m2p(x),m2p(y),m2p(w),m2p(h));ox.fill();ox.stroke();}
+  else if(tool==='circle'){ox.beginPath();ox.ellipse(m2p(x+w/2),m2p(y+h/2),m2p(w/2),m2p(h/2),0,0,Math.PI*2);ox.fill();ox.stroke();}
+  else if(tool==='polygon'){const tmp={type:'polygon',sides:6,r:Math.min(w,h)/2,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2};ox.beginPath();drawShp(ox,tmp);ox.fill();ox.stroke();}
+  ox.setLineDash([]);
+}
+
+function finDraw(a,b){
+  const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);
+  if(w<10||h<10)return;
+  if(tool==='rect')addShape({type:'rect',name:`Rect ${Math.round(w)}×${Math.round(h)}`,x,y,w,h,color:'#1e3a5a'});
+  else if(tool==='circle')addShape({type:'ellipse',name:'Ellipse',rx:w/2,ry:h/2,cx:x+w/2,cy:y+h/2,color:'#1e3a4a'});
+  else if(tool==='polygon')addShape({type:'polygon',name:'Hex',sides:6,r:Math.min(w,h)/2,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2,color:'#302060'});
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  // Tool shortcuts
+  if(e.key==='s'||e.key==='S'){setTool('select');return;}
+  if(e.key==='r'||e.key==='R'){setTool('rect');return;}
+  if(e.key==='e'||e.key==='E'){setTool('circle');return;}
+  if(e.key==='Delete'||e.key==='Backspace'){if(selId)remShape(selId);}
+  if(e.key==='Escape'){selId=null;redraw();}
+  if(e.ctrlKey&&e.key==='a'){selId=shapes.length?shapes[shapes.length-1].id:null;redraw();}
+  if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();}
+  const s=shapes.find(x=>x.id===selId);
+  if(s){const step=GRID;if(e.key==='ArrowLeft'){e.preventDefault();mvBy(s,-step,0);redraw();}if(e.key==='ArrowRight'){e.preventDefault();mvBy(s,step,0);redraw();}if(e.key==='ArrowUp'){e.preventDefault();mvBy(s,0,-step);redraw();}if(e.key==='ArrowDown'){e.preventDefault();mvBy(s,0,step);redraw();}}
+});
+
+function saveHist(){hist.push(JSON.parse(JSON.stringify({shapes,colorMap,selId,holeOv})));if(hist.length>40)hist.shift();}
+function undo(){if(!hist.length)return;const st=hist.pop();shapes=st.shapes;colorMap=st.colorMap;selId=st.selId;holeOv=st.holeOv;idCtr=shapes.reduce((m,s)=>Math.max(m,s.id||0),0);redraw();}
+
+function applyBoardPreset(val){
+  if(val==='custom'){document.getElementById('csg').style.display='';return;}
+  document.getElementById('csg').style.display='none';
+  const p=BPRESETS[val];board.w=p.w;board.h=p.h;
+  // Keep board background shape in sync
+  const bs=shapes.find(s=>s.isBoard);
+  if(bs){bs.w=board.w;bs.h=board.h;}
+  initCanvas();redraw();
+}
+function applyCustomSize(){
+  board.w=+document.getElementById('cw2').value||560;board.h=+document.getElementById('ch2').value||560;
+  const bs=shapes.find(s=>s.isBoard);if(bs){bs.w=board.w;bs.h=board.h;}
+  initCanvas();redraw();
+}
+function setZoom(z){zoom=z;document.getElementById('zlbl').textContent=Math.round(z*100)+'%';initCanvas();redraw();}
+function toggleEM(){
+  const menu=document.getElementById('emenu');
+  const btn=document.querySelector('.expbtn');
+  const r=btn.getBoundingClientRect();
+  menu.style.top=(r.bottom+4)+'px';
+  menu.style.left='auto';
+  menu.style.right=(window.innerWidth-r.right)+'px';
+  menu.classList.toggle('open');
+}
+function closeEM(){document.getElementById('emenu').classList.remove('open');}
+
+// ── SVG PATH HELPERS ─────────────────────────────────────────
+function hPill(cx,cy){const hw=HW/2,hh=HH/2,r=HR,x=cx-hw,y=cy-hh;return`M${x+r},${y}L${x+hw*2-r},${y}A${r},${r} 0 0 1 ${x+hw*2},${y+r}L${x+hw*2},${y+hh*2-r}A${r},${r} 0 0 1 ${x+hw*2-r},${y+hh*2}L${x+r},${y+hh*2}A${r},${r} 0 0 1 ${x},${y+hh*2-r}L${x},${y+r}A${r},${r} 0 0 1 ${x+r},${y}Z`;}
+
+function s2SVG(s){
+  switch(s.type){
+    case'rect':case'image':return`M${s.x},${s.y}h${s.w}v${s.h}h${-s.w}Z`;
+    case'ellipse':return`M${s.cx-s.rx},${s.cy}a${s.rx},${s.ry} 0 1 0 ${s.rx*2},0a${s.rx},${s.ry} 0 1 0 ${-s.rx*2},0Z`;
+    case'polygon':{const p=polyPts(s);return`M${p.map(pt=>`${pt.x},${pt.y}`).join('L')}Z`;}
+    case'lshape':{const lw=s.legW||s.w/2;return`M${s.x},${s.y}L${s.x+lw},${s.y}L${s.x+lw},${s.y+s.h-lw}L${s.x+s.w},${s.y+s.h-lw}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;}
+    case'tshape':{const sh=s.stemH||s.h/2,sw=s.w/3,sx=s.x+(s.w-sw)/2;return`M${s.x},${s.y}L${s.x+s.w},${s.y}L${s.x+s.w},${s.y+sh}L${sx+sw},${s.y+sh}L${sx+sw},${s.y+s.h}L${sx},${s.y+s.h}L${sx},${s.y+sh}L${s.x},${s.y+sh}Z`;}
+    case'arch':{const ah=s.h*.55;return`M${s.x},${s.y+ah}A${s.w/2},${ah} 0 0 1 ${s.x+s.w},${s.y+ah}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;}
+    case'oval':return`M${s.x},${s.y+s.h/2}A${s.w/2},${s.h/2} 0 1 0 ${s.x+s.w},${s.y+s.h/2}A${s.w/2},${s.h/2} 0 1 0 ${s.x},${s.y+s.h/2}Z`;
+    case'trapezium':{const tw=s.topW||s.w*.6,off=(s.w-tw)/2;return`M${s.x+off},${s.y}L${s.x+s.w-off},${s.y}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;}
+    case'parallelogram':{const sk=s.skew||s.w*.25;return`M${s.x+sk},${s.y}L${s.x+s.w},${s.y}L${s.x+s.w-sk},${s.y+s.h}L${s.x},${s.y+s.h}Z`;}
+    case'rhombus':return`M${s.x+s.w/2},${s.y}L${s.x+s.w},${s.y+s.h/2}L${s.x+s.w/2},${s.y+s.h}L${s.x},${s.y+s.h/2}Z`;
+    case'kite':return`M${s.x+s.w/2},${s.y}L${s.x+s.w},${s.y+s.h*.4}L${s.x+s.w/2},${s.y+s.h}L${s.x},${s.y+s.h*.4}Z`;
+    case'triangle':return`M${s.x+s.w/2},${s.y}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;
+    case'righttri':return`M${s.x},${s.y}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;
+    case'scalene':return`M${s.x+s.w*.25},${s.y}L${s.x+s.w},${s.y+s.h}L${s.x},${s.y+s.h}Z`;
+    case'star':{const pts2=starPts(s);return'M'+pts2.map(p=>`${p.x},${p.y}`).join('L')+'Z';}
+    case'heart':{const cx2=s.x+s.w/2,r2=s.w/4,ty=s.y+s.h*.22;return`M${cx2},${s.y+s.h*.9}C${s.x-s.w*.1},${s.y+s.h*.5} ${s.x},${s.y} ${cx2-r2},${s.y+s.h*.15}A${r2},${r2} 0 0 1 ${cx2},${ty}A${r2},${r2} 0 0 1 ${cx2+r2*2-r2},${s.y+s.h*.15}C${s.x+s.w},${s.y} ${s.x+s.w+s.w*.1},${s.y+s.h*.5} ${cx2},${s.y+s.h*.9}Z`;}
+    case'crescent':{const cx2=s.x+s.w/2,cy2=s.y+s.h/2,r2=s.w/2,r3=r2*.87,cx3=cx2+s.w*.35;return`M${cx2+r2},${cy2}A${r2},${r2} 0 1 0 ${cx2-r2},${cy2}A${r2},${r2} 0 1 0 ${cx2+r2},${cy2}M${cx3+r3},${cy2}A${r3},${r3} 0 1 1 ${cx3-r3},${cy2}A${r3},${r3} 0 1 1 ${cx3+r3},${cy2}Z`;}
+    case'cross':{const arm=s.arm||s.w/3,cx2=s.x+s.w/2,cy2=s.y+s.h/2;return`M${cx2-arm/2},${s.y}L${cx2+arm/2},${s.y}L${cx2+arm/2},${cy2-arm/2}L${s.x+s.w},${cy2-arm/2}L${s.x+s.w},${cy2+arm/2}L${cx2+arm/2},${cy2+arm/2}L${cx2+arm/2},${s.y+s.h}L${cx2-arm/2},${s.y+s.h}L${cx2-arm/2},${cy2+arm/2}L${s.x},${cy2+arm/2}L${s.x},${cy2-arm/2}L${cx2-arm/2},${cy2-arm/2}Z`;}
+    case'pie':{const a1=s.startA*Math.PI/180,a2=s.endA*Math.PI/180,laf=(a2-a1)>Math.PI?1:0;return`M${s.cx},${s.cy}L${s.cx+s.r*Math.cos(a1)},${s.cy+s.r*Math.sin(a1)}A${s.r},${s.r} 0 ${laf} 1 ${s.cx+s.r*Math.cos(a2)},${s.cy+s.r*Math.sin(a2)}Z`;}
+    case'arrow':{const hw=s.headW||s.w*.5,hh=s.headH||s.h,bh=s.h*.35,hx=s.x+s.w-hw,my=s.y+s.h/2;return`M${s.x},${my-bh/2}L${hx},${my-bh/2}L${hx},${s.y}L${s.x+s.w},${my}L${hx},${s.y+s.h}L${hx},${my+bh/2}L${s.x},${my+bh/2}Z`;}
+  }
+  return'';
+}
+
+// ── EXPORTS ───────────────────────────────────────────────────
+function doExport(fmt){closeEM();({svg:exportSVG,dxf:exportDXF,gcode:exportGCode,step:exportDXF,pdf:exportPDF,png:exportPNG})[fmt]?.();}
+
+// Compute tight bounding box across all shapes + their holes
+function getExportBounds(){
+  if(!shapes.length) return {x:0,y:0,w:board.w,h:board.h};
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  shapes.forEach(s=>{
+    if(s.isBoard) return; // board background never exported
+    const b=getBounds(s);
+    if(b){minX=Math.min(minX,b.x);minY=Math.min(minY,b.y);maxX=Math.max(maxX,b.x+b.w);maxY=Math.max(maxY,b.y+b.h);}
+    getHoles(s).forEach(h=>{
+      minX=Math.min(minX,h.x-HW/2);minY=Math.min(minY,h.y-HH/2);
+      maxX=Math.max(maxX,h.x+HW/2);maxY=Math.max(maxY,h.y+HH/2);
+    });
+  });
+  const pad=2;
+  return{x:minX-pad,y:minY-pad,w:maxX-minX+pad*2,h:maxY-minY+pad*2};
+}
+
+function exportSVG(){
+  const eb=getExportBounds();
+  let sv=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- SkadisCAD – ${HW}×${HH}mm pills, rx=${HR}mm, ${GRID}mm grid -->\n`;
+  sv+=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${eb.x} ${eb.y} ${eb.w} ${eb.h}" width="${eb.w}mm" height="${eb.h}mm">\n`;
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    sv+=`<!-- ${s.name} -->\n`;
+    if(s.type==='image'){const im=imgStore[s.id];if(im?.type==='svg'&&im.svgPaths){const sx=s.w/Math.max(.01,im.svgW),sy=s.h/Math.max(.01,im.svgH);sv+=`<g transform="translate(${s.x},${s.y}) scale(${sx},${sy})">\n`;im.svgPaths.forEach(d=>sv+=`<path d="${d}" fill="none" stroke="#000" stroke-width="${(.3/Math.min(sx,sy)).toFixed(3)}"/>\n`);sv+=`</g>\n`;return;}}
+    sv+=`<path d="${s2SVG(s)}" fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="2,1"/>\n`;
+    getHoles(s).forEach(h=>sv+=`<path d="${hPill(h.x,h.y)}" fill="none" stroke="#000" stroke-width="0.5"/>\n`);
+  });
+  sv+=`</svg>`;dl('skadis-pegboard.svg',sv,'image/svg+xml');
+}
+
+function exportDXF(){
+  const eb=getExportBounds();
+  // DXF Y-axis is flipped; origin at bottom-left of export bounds
+  const totalH=eb.y+eb.h;
+  const fy=y=>totalH-y;
+  let d=`0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n`;
+  d+=`0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n2\n`;
+  d+=`0\nLAYER\n2\nOUTLINE\n70\n0\n62\n7\n6\nCONTINUOUS\n`;
+  d+=`0\nLAYER\n2\nHOLES\n70\n0\n62\n3\n6\nCONTINUOUS\n`;
+  d+=`0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n`;
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    const b=getBounds(s);
+    if(b){
+      d+=`0\nLWPOLYLINE\n8\nOUTLINE\n90\n4\n70\n1\n`;
+      [[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].forEach(([x,y])=>d+=`10\n${x.toFixed(4)}\n20\n${fy(y).toFixed(4)}\n`);
+    }
+    getHoles(s).forEach(hole=>{
+      const st=16,hw=HW/2,hh=HH/2,r=HR,pts=[];
+      for(let i=0;i<=st;i++){const a=Math.PI+(i/st)*Math.PI;pts.push([hole.x+Math.cos(a)*r,hole.y+hh-r+Math.sin(a)*r]);}
+      for(let i=0;i<=st;i++){const a=(i/st)*Math.PI;pts.push([hole.x+Math.cos(a)*r,hole.y-hh+r+Math.sin(a)*r]);}
+      d+=`0\nLWPOLYLINE\n8\nHOLES\n90\n${pts.length}\n70\n1\n`;
+      pts.forEach(([x,y])=>d+=`10\n${x.toFixed(4)}\n20\n${fy(y).toFixed(4)}\n`);
+    });
+  });
+  d+=`0\nENDSEC\n0\nEOF\n`;dl('skadis-pegboard.dxf',d,'application/dxf');
+}
+
+function exportGCode(){
+  const fr=1200,pr=300,cd=-5,sz=5,ss=18000;
+  let gc=`;=== SkadisCAD G-Code ===\n; Holes: ${HW}×${HH}mm pills, ${GRID}mm grid\nG90 G21\nM3 S${ss}\nG0 Z${sz}\n\n; Shape outlines\n`;
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    const b=getBounds(s);
+    if(b){
+      gc+=`; Outline: ${s.name}\nG0 X${b.x.toFixed(3)} Y${b.y.toFixed(3)}\nG1 Z${cd} F${pr}\n`;
+      gc+=`G1 X${(b.x+b.w).toFixed(3)} F${fr}\nG1 Y${(b.y+b.h).toFixed(3)}\nG1 X${b.x.toFixed(3)}\nG1 Y${b.y.toFixed(3)}\nG0 Z${sz}\n\n`;
+    }
+  });
+  gc+=`; Holes\n`;
+  let n=0;
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    gc+=`; ${s.name}\n`;
+    getHoles(s).forEach(h=>{
+      n++;const hh=HH/2,r=HR;
+      gc+=`; H${n}(${h.x.toFixed(2)},${h.y.toFixed(2)})\nG0 X${h.x.toFixed(3)} Y${(h.y+hh-r).toFixed(3)}\nG1 Z${cd} F${pr}\nG1 Y${(h.y-hh+r).toFixed(3)} F${fr}\nG3 X${h.x.toFixed(3)} Y${(h.y-hh+r).toFixed(3)} I0 J${r.toFixed(3)}\nG0 Z${sz}\n`;
+    });
+  });
+  gc+=`\nM5\nG0 Z${sz}\nG0 X0 Y0\nM30\n; Total holes: ${n}\n`;
+  dl('skadis-pegboard.nc',gc,'text/plain');
+}
+
+function exportPDF(){
+  const sv=buildSVG(true);
+  const eb=getExportBounds();
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Skadis Pegboard</title><style>@page{size:${eb.w}mm ${eb.h}mm;margin:0}body{margin:0}svg{display:block;width:${eb.w}mm;height:${eb.h}mm}</style></head><body>${sv}</body></html>`);
+  win.document.close();setTimeout(()=>win.print(),500);
+}
+
+function buildSVG(p=false){
+  const eb=getExportBounds();
+  let sv=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${eb.x} ${eb.y} ${eb.w} ${eb.h}" width="${eb.w}mm" height="${eb.h}mm">`;
+  if(p){sv+=`<rect x="${eb.x}" y="${eb.y}" width="${eb.w}" height="${eb.h}" fill="white"/>`;}
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    const c=colorMap[s.id]||s.color||'#1e3a5a';
+    sv+=`<path d="${s2SVG(s)}" fill="${p?'#f0f0f0':c}" stroke="${p?'#000':'rgba(100,160,200,.5)'}" stroke-width="0.3"/>`;
+    getHoles(s).forEach(h=>sv+=`<path d="${hPill(h.x,h.y)}" fill="${p?'white':'#0a161e'}" stroke="${p?'#000':'rgba(160,200,220,.3)'}" stroke-width="0.3"/>`);
+  });
+  return sv+'</svg>';
+}
+
+function exportPNG(){
+  const sc=4;
+  const eb=getExportBounds();
+  const oc2=document.createElement('canvas');
+  oc2.width=Math.round(eb.w*sc); oc2.height=Math.round(eb.h*sc);
+  const ctx=oc2.getContext('2d');
+  // White background for PNG
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,oc2.width,oc2.height);
+  // Translate so eb.x/eb.y maps to canvas origin
+  ctx.translate(-eb.x*sc, -eb.y*sc);
+  shapes.filter(s=>!s.isBoard).forEach(s=>{
+    const c=colorMap[s.id]||s.color||'#1e3a5a';
+    ctx.save();ctx.beginPath();
+    const b=getBounds(s);if(b)ctx.rect(b.x*sc,b.y*sc,b.w*sc,b.h*sc);
+    ctx.fillStyle=c;ctx.fill();ctx.restore();
+    getHoles(s).forEach(h=>{
+      const hw=HW/2*sc,hh=HH/2*sc,r=HR*sc,px=h.x*sc-hw,py=h.y*sc-hh;
+      ctx.save();ctx.beginPath();
+      ctx.moveTo(px+r,py);ctx.lineTo(px+hw*2-r,py);ctx.arcTo(px+hw*2,py,px+hw*2,py+r,r);
+      ctx.lineTo(px+hw*2,py+hh*2-r);ctx.arcTo(px+hw*2,py+hh*2,px+hw*2-r,py+hh*2,r);
+      ctx.lineTo(px+r,py+hh*2);ctx.arcTo(px,py+hh*2,px,py+hh*2-r,r);
+      ctx.lineTo(px,py+r);ctx.arcTo(px,py,px+r,py,r);ctx.closePath();
+      ctx.fillStyle='#0a161e';ctx.fill();ctx.restore();
+    });
+  });
+  oc2.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='skadis-pegboard.png';a.click();URL.revokeObjectURL(u);});
+}
+
+function dl(fn,data,mime){const b=new Blob([data],{type:mime}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
+
+// ── HELP MODAL ───────────────────────────────────────────────
+function openHelp(){document.getElementById('hmodal').classList.add('open');}
+function closeHelp(){document.getElementById('hmodal').classList.remove('open');}
+function showTab(name){
+  document.querySelectorAll('.htab').forEach((t,i)=>{
+    const tabs=['basics','shapes','holes','import','export'];
+    t.classList.toggle('active',tabs[i]===name);
+  });
+  document.querySelectorAll('.hpane').forEach(p=>{
+    p.classList.toggle('active',p.id==='tab-'+name);
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+buildPGrid();buildCGrid();initCanvas();
+// Board background — provides hole grid for the full board. Never exported.
+addShape({type:'rect',name:'Board',x:0,y:0,w:board.w,h:board.h,color:'#1a2f42',isBoard:true});
+selId=null;redraw();
+new ResizeObserver(()=>{initCanvas();redraw();}).observe(document.getElementById('canvas-area'));
+document.addEventListener('click',e=>{if(!e.target.closest('.expw'))closeEM();});
+
+// Warn on close if there's a shape placed
+window.addEventListener('beforeunload',e=>{
+  if(shapes.filter(s=>!s.isBoard).length>0){
+    e.preventDefault();
+    e.returnValue='You have unsaved changes. Export your design before leaving.';
+  }
+});
+
+// Service worker registration for offline use
+if('serviceWorker' in navigator){
+  // Inline SW via blob for standalone distribution
+  const swCode=`
+self.addEventListener('install',e=>e.waitUntil(
+  caches.open('skadiscad-v1').then(c=>c.addAll([location.pathname]))
+));
+self.addEventListener('fetch',e=>e.respondWith(
+  caches.match(e.request).then(r=>r||fetch(e.request))
+));`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const swURL=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swURL).catch(()=>{});
+}
+</script>
+</body>
+</html>
